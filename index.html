@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>st0ckBrok3r</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8" />
+
+    <!--Custom theme "square-UI" URL: https://github.com/ququplay/jquery-mobile-square-ui-theme -->
+    <link rel="stylesheet" href="./css/jquery.mobile.squareui.min.css"/>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile.structure-1.4.2.min.css"/>
+
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+    <script src="./js/main.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        .graphContainer
+        {
+            position    : relative;
+            padding     : 0;
+            margin      : 0;
+        }
+        .graphContainer canvas
+        {
+            padding     : 0;
+            margin      : 0;
+        }
+        .graphValue
+        {
+            position    : absolute;
+            top         : 90px;
+            left        : 90px;
+            width       : 140px;
+            height      : 140px;
+            background  : #F9F9F9;
+            text-align  : center;
+            border-style: solid;
+            border-color: #333;
+            border-width: 1px;
+
+            color       : red;
+            -webkit-border-radius: 70px;
+            -moz-border-radius: 70px;
+            border-radius: 70px;
+        }
+    </style>
+</head>
+<body>
+    <section data-role="page" data-theme="a" id="navigation">
+        <header data-role="header">
+            <h1 id="yolo">st0ckBrok3r</h1>
+        </header>
+        <nav data-role="navbar" data-position="fixed">
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="f" data-transition="slide" href="#Abnorma" >Abnorma</a>
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="g" data-transition="slide" href="#Bizarro" >Bizarro</a>
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="e" data-transition="slide" href="#Confusor">Confusor</a>
+        </nav>
+    </section>
+
+    <section data-role="page" data-theme="e" id="Confusor">
+        <header data-position="fixed" data-role="header">
+            <a  class="ui-btn ui-btn-icon-left ui-icon-arrow-l" data-rel="back" data-corners="false" href="#"></a>
+            <h1 id="confusorHeader">Confusor</h1>
+        </header>
+        <div data-role="content" id="confusorGraph" class="graphContainer">
+            <canvas id=canvasConfusor>
+                Canvas is not... supported? This is horrible... :(
+            </canvas>
+            <!--<div id="confusorVal" class="graphValue">50</div>-->
+        </div>
+        <article data-role="content">
+            <p>
+            Confusor went out one morning and got very confused in the head.
+            So confused infact that he forgot to breathe.
+            Confusor died that morning.
+            Alone.
+            Help.
+            </p>
+            
+            
+        </article>
+    </section>
+</body>
+</html>
