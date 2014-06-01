@@ -186,10 +186,10 @@ function Gauge(arg_context, arg_radius, arg_length, arg_point){
 
     function update(arg_point){
         if(arg_point) mPoint = arg_point;
-    };
+    }
     this.draw           = function(){
-        var startArc    =
-        var endArc      = 
+        var startArc    = 0;
+        var endArc      = 0;
         mContext.beginPath();
 
     };
