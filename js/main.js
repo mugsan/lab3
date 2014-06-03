@@ -11,7 +11,7 @@ var GLOBAL = {
     CANVAS_HEIGHT   : 320,
     CANVAS_BG_COLOR : "#F9F9F9",
     CANVAS_STROKE   : "#333333",
-    CENTER_Y        : 160,
+    CENTER_Y        : 320,
     CENTER_X        : 160,
     STOCK_INTERVAL  : 1000,
     GRAPH_INTERVAL  : 20
@@ -72,6 +72,7 @@ function Stock(arg_name, arg_path){
 function Graph(arg_stock, arg_canvas){
     "use strict";
     
+    var lastVal         = 0;
     var mCanvas         = arg_canvas;
         mCanvas.width   = GLOBAL.CANVAS_WIDTH;
         mCanvas.height  = GLOBAL.CANVAS_HEIGHT;
@@ -81,7 +82,7 @@ function Graph(arg_stock, arg_canvas){
     var POINT_SPEED     = Math.PI / 700;
 
     var center          = new Point({x: GLOBAL.CENTER_X, y: GLOBAL.CENTER_Y, polar: false});
-    var mData           = new Polygon(center, 30);
+    var mData           = new Polygon(center, 17);
     var intervalId;
 
         arg_stock.subscribe(this);
@@ -98,6 +99,8 @@ function Graph(arg_stock, arg_canvas){
         mContext.fill();
         mContext.beginPath();
         mContext.arc(center.getX(), center.getY(), 80, 0, 2 * Math.PI);
+        mContext.moveTo(0, center.getY());
+        mContext.lineTo(320,center.getY());
         mContext.stroke();
         mData.draw(mContext);
     }
@@ -112,7 +115,9 @@ function Graph(arg_stock, arg_canvas){
     this.update         = function(arg_value){
         if(arg_value){
             var tPoint = new Point({theta: 0, radius: 80, point: center, polar: true});
-            mData.addPoint(new Tree(tPoint, arg_value, "#44" + arg_value + "44"));
+            mData.addPoint(new GlassPinne(tPoint, arg_value, lastVal,"#33" + arg_value + "33"));
+            //mData.addPoint(new Tree(tPoint, arg_value,"#33" + arg_value + "33"));
+            lastVal = arg_value;
         }
     };
 }//----End Graph
@@ -122,6 +127,7 @@ function Polygon(arg_point, arg_size){
     var mCenter         = arg_point;
     var mSize           = arg_size;
     var mQueue          = [];
+
 
     this.addPoint       = function(arg_object){
         if(mQueue[mSize -1]){
@@ -166,6 +172,10 @@ function Point(arg_object){
         y = arg_object.y;
     }
 
+    this.getCenter      = function(){
+        return center;
+    };
+
     this.getTheta       = function(){
         return theta;
     };
@@ -198,11 +208,11 @@ function Tree(arg_point, arg_value, arg_color){
     var mColor          = arg_color;
     var mCenter         = arg_point;
     var mValue          = arg_value;
-    var mSatPt          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue / 3 });
+    var mSatPt          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue});
 
     this.draw           = function(arg_context){
         arg_context.beginPath();
-        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 6, 0, 2 * Math.PI);
+        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 3, 0, 2 * Math.PI);
         arg_context.moveTo(mCenter.getX(), mCenter.getY());
         arg_context.lineTo(mSatPt.getX(), mSatPt.getY());
         arg_context.fillStyle = mColor;
@@ -214,6 +224,38 @@ function Tree(arg_point, arg_value, arg_color){
         mCenter.rotate(arg_theta);
     };
 }//----End Tree
+
+
+function GlassPinne(arg_point, arg_value, arg_oldValue, arg_color){
+    var mColor          = arg_color;
+    var mStartPt        = arg_point;
+    var mValue          = arg_value;
+    var mOldVal         = arg_oldValue;
+
+    var mEndPt          = new Point({polar: true, point: arg_point.getCenter(), theta: -48 * Math.PI / 700, radius: 80});
+    var mSecPt          = new Point({polar: true, point: mStartPt, theta: 0, radius: mOldVal});
+    var mThirdPt        = new Point({polar: true, point: mEndPt, theta: -48 * Math.PI / 700, radius: mValue});
+
+    this.draw           = function(arg_context){
+        arg_context.beginPath();
+        arg_context.moveTo(mStartPt.getX(), mStartPt.getY());
+        arg_context.lineTo(mSecPt.getX(), mSecPt.getY());
+        arg_context.lineTo(mThirdPt.getX(), mThirdPt.getY());
+        arg_context.lineTo(mEndPt.getX(), mEndPt.getY());
+        arg_context.fillStyle = mColor;
+        arg_context.fill();
+        arg_context.stroke();
+    };
+
+    this.move            = function(arg_theta){
+        mStartPt.rotate(arg_theta);
+        mSecPt.rotate(arg_theta);
+        mThirdPt.rotate(arg_theta);
+        mEndPt.rotate(arg_theta);
+    };
+
+}
+
 
 
 
