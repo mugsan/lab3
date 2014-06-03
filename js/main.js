@@ -1,4 +1,6 @@
-/*global $:false*/
+//Setting for JSHint.
+/*global $:false, setInterval:false, document:false, clearInterval:false, console:false */
+
 Number.prototype.mod = function(n){
     "use strict";
     return ((this % n) + n) % n;
@@ -8,14 +10,13 @@ var GLOBAL = {
     CANVAS_WIDTH    : 320,
     CANVAS_HEIGHT   : 320,
     CANVAS_BG_COLOR : "#F9F9F9",
-    CANVAS_FILL     : "#333333",
-    CANVAS_IN_R     : 70,
-    CANVAS_OUT_R    : 150,
+    CANVAS_STROKE   : "#333333",
     CENTER_Y        : 160,
     CENTER_X        : 160,
     STOCK_INTERVAL  : 1000,
-    GRAPH_INTERVAL  : 40
+    GRAPH_INTERVAL  : 20
 };
+
 
 
 $(document).on('pageinit', function(){
@@ -56,7 +57,7 @@ function Stock(arg_name, arg_path){
     this.start          = function(){
         intervalId          = setInterval(function(){
             update();
-        },1000);
+        },GLOBAL.STOCK_INTERVAL);
     };
     this.stop           = function(){
         clearInterval(intervalId);
@@ -70,128 +71,149 @@ function Stock(arg_name, arg_path){
 
 function Graph(arg_stock, arg_canvas){
     "use strict";
-    var POINT_SPEED     = Math.PI / 750;
-    var mData           = new FifoQueue(32);
-    var theta           = 0;//Math.PI / 2;
-    var endTheta        = Math.PI;//5 * Math.PI / 2;
-    var intervalId;
     
     var mCanvas         = arg_canvas;
         mCanvas.width   = GLOBAL.CANVAS_WIDTH;
         mCanvas.height  = GLOBAL.CANVAS_HEIGHT;
 
-    var mContext       = mCanvas.getContext('2d');
-        mContext.fillStyle     = GLOBAL.CANVAS_BG_COLOR;
-        mContext.strokeStyle   = GLOBAL.CANVAS_FILL;
+    var mContext        = mCanvas.getContext('2d');
+
+    var POINT_SPEED     = Math.PI / 700;
+
+    var center          = new Point({x: GLOBAL.CENTER_X, y: GLOBAL.CENTER_Y, polar: false});
+    var mData           = new Polygon(center, 30);
+    var intervalId;
 
         arg_stock.subscribe(this);
 
-    function draw(){
-        mContext.fillRect(0, 0, GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
-        mContext.beginPath();
-        mContext.strokeStyle = "#000";
 
-        if(mData.getLastObject()){
-            mContext.moveTo(mData.getLastObject().getX(),mData.getLastObject().getY());
-            mData.exec(function(entry){
-                mContext.lineTo(entry.getX(), entry.getY());
-                if(entry.getTheta() < endTheta){
-                    mContext.lineTo(GLOBAL.CENTER_X, GLOBAL.CENTER_Y);
-                    mContext.moveTo(entry.getX(), entry.getY());
-                    entry.move();
-                }
-            });
-        }
-        mContext.fill();
-        mContext.stroke();
-        mContext.beginPath();
-        mContext.strokeStyle = "#FF0000";
-        mContext.moveTo(GLOBAL.CENTER_X, GLOBAL.CENTER_Y - GLOBAL.CANVAS_OUT_R);
-        mContext.lineTo(GLOBAL.CENTER_X, GLOBAL.CENTER_Y);
-        mContext.stroke();
-
+    function physics(){
+        mData.rotate(POINT_SPEED);
     }
+
+
+    function draw(){
+        mContext.fillStyle = GLOBAL.CANVAS_BG_COLOR;
+        mContext.fillRect(0, 0, GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
+        mContext.fill();
+        mContext.beginPath();
+        mContext.arc(center.getX(), center.getY(), 80, 0, 2 * Math.PI);
+        mContext.stroke();
+        mData.draw(mContext);
+    }
+
     this.start          = function(){
         intervalId      = setInterval(function(){
+            physics();
             draw();
         },GLOBAL.GRAPH_INTERVAL);
     };
+
     this.update         = function(arg_value){
         if(arg_value){
-            mData.enQueue(new Point(GLOBAL.CENTER_X, GLOBAL.CENTER_Y, arg_value,theta,POINT_SPEED));
+            var tPoint = new Point({theta: 0, radius: 80, point: center, polar: true});
+            mData.addPoint(new Tree(tPoint, arg_value, "#44" + arg_value + "44"));
         }
     };
 }//----End Graph
 
-function FifoQueue(arg_size){
+function Polygon(arg_point, arg_size){
     "use strict";
-    var length          = arg_size;
-    var queue           = [];
+    var mCenter         = arg_point;
+    var mSize           = arg_size;
+    var mQueue          = [];
 
-    this.enQueue        = function(arg_object){
-        if(queue[length -1]){
-            queue = queue.slice(1);
+    this.addPoint       = function(arg_object){
+        if(mQueue[mSize -1]){
+            mQueue = mQueue.slice(1);
         }
-        queue.push(arg_object);
+        mQueue.push(arg_object);
     };
 
-    this.getObjectAt    = function(arg_index){
-        return queue[arg_index];
-    };
-    this.getLastObject  = function(){
-        return queue[queue.length - 1];
-    };
-    this.exec           = function(arg_callBack){
-        for(var len = queue.length - 2; 0 < len; len--){
-            arg_callBack(queue[len]);
+    this.rotate         = function(arg_theta){
+        if(mQueue){
+            for(var i = mQueue.length - 1; i > 0; i--){
+                mQueue[i].move(arg_theta);
+            }
         }
     };
-}//----End Fifoqeue
 
-function Point(arg_center_x, arg_center_y, arg_value, arg_theta, arg_speed){
+    this.draw           = function(arg_context){
+        if(mQueue){
+            for(var i = mQueue.length - 1; i > 0; i--){
+                mQueue[i].draw(arg_context);
+            }
+        }
+    };
+
+}//----End Polygon
+
+function Point(arg_object){
     "use strict";
-    var value           = parseInt(arg_value) + GLOBAL.CANVAS_IN_R;
-    var centerX         = arg_center_x;
-    var centerY         = arg_center_y;
-    var theta           = arg_theta;
-    var speed           = arg_speed;
 
-    this.getX           = function(){
-        return centerX + value * Math.cos(theta);
-    };
-    this.getY           = function(){
-        return centerY - value * Math.sin(theta);
-    };
-    this.move           = function(){
-        //value           = value * (theta/ (2 * Math.PI));
-        theta          += speed;
-    };
-    this.setTheta       = function(arg_theta){
-        theta           = arg_theta;
-    };
+    var center          = arg_object.point;
+    var theta           = arg_object.theta;
+    var radius          = parseInt(arg_object.radius);
+    var isPolar         = arg_object.polar;
+
+    var x,y;
+
+    if(isPolar){
+        x = center.getX() + radius * Math.cos(theta);
+        y = center.getY() - radius * Math.sin(theta);
+    }else{
+        x = arg_object.x;
+        y = arg_object.y;
+    }
+
     this.getTheta       = function(){
         return theta;
     };
-    this.getValue       = function(){
-        return value;
+
+    this.getX           = function(){
+        return x;
+    };
+    this.getY           = function(){
+        return y;
+    };
+    this.move           = function(arg_dX, arg_dY){
+        x += arg_dX;
+        y += arg_dY;
+    };
+    this.moveTo         = function(arg_x, arg_y){
+        x = arg_x;
+        y = arg_y;
+    };
+    this.rotate         = function(arg_theta){
+        theta += arg_theta;
+        this.rotateTo(theta);
+    };
+    this.rotateTo       = function(arg_theta){
+        x = center.getX() + radius * Math.cos(arg_theta);
+        y = center.getY() - radius * Math.sin(arg_theta);
     };
 }//----End Point
 
-function Gauge(arg_context, arg_radius, arg_length, arg_point){
-    "use strict";
-    var mContext        = arg_context;
-    var mPoint          = arg_point;
-    var radius          = arg_radius;
-    var length          = arg_length;
+function Tree(arg_point, arg_value, arg_color){
+    var mColor          = arg_color;
+    var mCenter         = arg_point;
+    var mValue          = arg_value;
+    var mSatPt          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue / 3 });
 
-    function update(arg_point){
-        if(arg_point) mPoint = arg_point;
-    }
-    this.draw           = function(){
-        var startArc    = 0;
-        var endArc      = 0;
-        mContext.beginPath();
-
+    this.draw           = function(arg_context){
+        arg_context.beginPath();
+        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 6, 0, 2 * Math.PI);
+        arg_context.moveTo(mCenter.getX(), mCenter.getY());
+        arg_context.lineTo(mSatPt.getX(), mSatPt.getY());
+        arg_context.fillStyle = mColor;
+        arg_context.fill();
+        arg_context.stroke();
     };
-};
+    this.move           = function(arg_theta){
+        mSatPt.rotate(arg_theta);
+        mCenter.rotate(arg_theta);
+    };
+}//----End Tree
+
+
 
