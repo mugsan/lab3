@@ -7,7 +7,7 @@ Number.prototype.mod = function(n){
 };
 
 var GLOBAL = {
-    CENTER_DIFF     : 60,
+    CENTER_DIFF     : 50,
     CANVAS_WIDTH    : 320,
     CANVAS_HEIGHT   : 160,
     CANVAS_BG_COLOR : "#77BBFF",
@@ -23,7 +23,7 @@ var GLOBAL = {
 $(document).on('pageinit', function(){
     "use strict";
     var confusorStock = new Stock("Confusor","./js/Bizarro.js");
-    var confusorGraph = new Graph(confusorStock,$('#canvasConfusor').get(0));
+    var confusorGraph = new Graph(confusorStock,$('#canvasConfusor').get(0), TriForce);
     confusorGraph.start();
     confusorStock.start();
 });
@@ -66,24 +66,24 @@ function Stock(arg_name, arg_path){
     this.subscribe      = function(arg_subscriber){
         observers.push(arg_subscriber);
     };
-    this.unSubscribe    = function(arg_subscriber){
-    };
 }//----End Stock
 
-function Graph(arg_stock, arg_canvas){
+function Graph(arg_stock, arg_canvas, arg_figure){
     "use strict";
     
+    var mFigure         = arg_figure;
     var lastVal         = 0;
+    var mData           = new FifoQueue(17);
+    var POINT_SPEED     = Math.PI / 700;
+
     var mCanvas         = arg_canvas;
         mCanvas.width   = GLOBAL.CANVAS_WIDTH;
         mCanvas.height  = GLOBAL.CANVAS_HEIGHT;
 
     var mContext        = mCanvas.getContext('2d');
 
-    var POINT_SPEED     = Math.PI / 700;
 
     var center          = new Point({x: GLOBAL.CENTER_X, y: GLOBAL.CENTER_Y, polar: false});
-    var mData           = new Polygon(center, 17);
     var intervalId;
 
         arg_stock.subscribe(this);
@@ -125,18 +125,16 @@ function Graph(arg_stock, arg_canvas){
     this.update         = function(arg_value){
         if(arg_value){
 
-            var tColor = "#" + (255 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2).toString(16) + "33";
-            var tPoint = new Point({theta: 0, radius: 60, point: center, polar: true});
-            mData.addPoint(new GlassPinne(tPoint, arg_value, lastVal, tColor));
-            //mData.addPoint(new Tree(tPoint, arg_value, tColor));
+            var tColor = "#" + (255 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2).toString(16) + "00";
+            var tPoint = new Point({theta: 0, radius: GLOBAL.CENTER_DIFF, point: center, polar: true});
+            mData.addPoint(new mFigure(tPoint, parseInt(arg_value), tColor));
             lastVal = arg_value;
         }
     };
 }//----End Graph
 
-function Polygon(arg_point, arg_size){
+function FifoQueue(arg_size){
     "use strict";
-    var mCenter         = arg_point;
     var mSize           = arg_size;
     var mQueue          = [];
 
@@ -164,7 +162,7 @@ function Polygon(arg_point, arg_size){
         }
     };
 
-}//----End Polygon
+}//----End FifoQueue
 
 function Point(arg_object){
     "use strict";
@@ -222,54 +220,98 @@ function Tree(arg_point, arg_value, arg_color){
     var mCenter         = arg_point;
     var mValue          = arg_value;
     var mSatPt          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue});
+    var mSatPt2         = new Point({polar: true, point: mSatPt, theta: 0, radius: mValue / 10 + 10});
 
     this.draw           = function(arg_context){
         arg_context.beginPath();
-        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 3, 0, 2 * Math.PI);
+        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 10, 0, 2 * Math.PI);
+        arg_context.moveTo(mSatPt2.getX(), mSatPt2.getY());
+        arg_context.arc(mSatPt2.getX(), mSatPt2.getY(), 2, 0, 2 * Math.PI);
         arg_context.moveTo(mCenter.getX(), mCenter.getY());
-        arg_context.lineTo(mSatPt.getX(), mSatPt.getY());
         arg_context.fillStyle = mColor;
         arg_context.fill();
         arg_context.stroke();
     };
     this.move           = function(arg_theta){
         mSatPt.rotate(arg_theta);
+        mSatPt2.rotate(3 / arg_value);
         mCenter.rotate(arg_theta);
     };
 }//----End Tree
 
-
-function GlassPinne(arg_point, arg_value, arg_oldValue, arg_color){
+function Plank(arg_point, arg_value, arg_color){
     "use strict";
     var mColor          = arg_color;
-    var mStartPt        = arg_point;
+    var mCenter         = arg_point;
     var mValue          = arg_value;
-    var mOldVal         = arg_oldValue;
 
-    var mEndPt          = new Point({polar: true, point: arg_point.getCenter(), theta: -48 * Math.PI / 700, radius: GLOBAL.CENTER_DIFF});
-    var mSecPt          = new Point({polar: true, point: mStartPt, theta: 0, radius: mOldVal});
-    var mThirdPt        = new Point({polar: true, point: mEndPt, theta: -48 * Math.PI / 700, radius: mValue});
+    var midPt           = new Point({polar: true, point: mCenter, theta: 0, radius: 50});
+    var startPt         = new Point({polar: true, point: midPt, theta: 0, radius: mValue / 2});
+    var endPt           = new Point({polar: true, point: midPt, theta: Math.PI, radius: mValue / 2});
 
     this.draw           = function(arg_context){
         arg_context.beginPath();
-        arg_context.moveTo(mStartPt.getX(), mStartPt.getY());
-        arg_context.lineTo(mSecPt.getX(), mSecPt.getY());
-        arg_context.lineTo(mThirdPt.getX(), mThirdPt.getY());
-        arg_context.lineTo(mEndPt.getX(), mEndPt.getY());
         arg_context.fillStyle = mColor;
         arg_context.fill();
         arg_context.stroke();
     };
 
-    this.move            = function(arg_theta){
-        mStartPt.rotate(arg_theta);
-        mSecPt.rotate(arg_theta);
-        mThirdPt.rotate(arg_theta);
-        mEndPt.rotate(arg_theta);
+    this.move           = function(arg_theta){
+        midPt.rotate(arg_theta);
+        mCenter.rotate(arg_theta);
+        endPt.rotate(arg_theta * 4);
+        startPt.rotate(arg_theta * 4);
+    };
+}//----End Plank
+
+
+function TriForce(arg_point, arg_value, arg_color){
+    "use strict";
+
+    var mColor          = arg_color;
+    var mCenter         = arg_point;
+    var mValue          = arg_value / 2;
+
+    var mPoints         = [];
+
+    mPoints.push(new Point({polar: true, point: mCenter, theta: 0, radius: 60}));
+    mPoints.push(new Point({polar: true, point: mPoints[0], theta: (3 * Math.PI)/ 2, radius: mValue}));
+    mPoints.push(new Point({polar: true, point: mPoints[1], theta: Math.PI / 6, radius: mValue}));
+    mPoints.push(new Point({polar: true, point: mPoints[2], theta: Math.PI / 6, radius: mValue}));
+    mPoints.push(new Point({polar: true, point: mPoints[3], theta: 5 * Math.PI / 6, radius: mValue}));
+    mPoints.push(new Point({polar: true, point: mPoints[4], theta: 5 * Math.PI / 6, radius: mValue})); 
+
+    this.draw           = function(arg_context){
+        if(mPoints[0].getTheta() < (3 * Math.PI / 2)){
+            arg_context.fillStyle = mColor;
+            arg_context.beginPath();
+            arg_context.moveTo(mPoints[0].getX(), mPoints[0].getY());
+            arg_context.lineTo(mPoints[1].getX(), mPoints[1].getY());
+            arg_context.lineTo(mPoints[2].getX(), mPoints[2].getY());
+            arg_context.closePath();
+            arg_context.fill();
+            arg_context.stroke();
+            arg_context.beginPath();
+            arg_context.moveTo(mPoints[2].getX(), mPoints[2].getY());
+            arg_context.lineTo(mPoints[3].getX(), mPoints[3].getY());
+            arg_context.lineTo(mPoints[4].getX(), mPoints[4].getY());
+            arg_context.closePath();
+            arg_context.fill();
+            arg_context.stroke();
+            arg_context.beginPath();
+            arg_context.moveTo(mPoints[4].getX(), mPoints[4].getY());
+            arg_context.lineTo(mPoints[5].getX(), mPoints[5].getY());
+            arg_context.lineTo(mPoints[0].getX(), mPoints[0].getY());
+            arg_context.closePath();
+            arg_context.fill();
+            arg_context.stroke();
+        }
     };
 
-}
-
-
-
-
+    this.move           = function(arg_theta){
+        mCenter.rotate(2*arg_theta);
+        for(var i = 0; i < 6; i++){
+            mPoints[i].rotate(2*arg_theta);
+        }
+    };
+}//----End TriForce
