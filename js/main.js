@@ -7,11 +7,12 @@ Number.prototype.mod = function(n){
 };
 
 var GLOBAL = {
+    CENTER_DIFF     : 60,
     CANVAS_WIDTH    : 320,
-    CANVAS_HEIGHT   : 320,
-    CANVAS_BG_COLOR : "#F9F9F9",
+    CANVAS_HEIGHT   : 160,
+    CANVAS_BG_COLOR : "#77BBFF",
     CANVAS_STROKE   : "#333333",
-    CENTER_Y        : 320,
+    CENTER_Y        : 160,
     CENTER_X        : 160,
     STOCK_INTERVAL  : 1000,
     GRAPH_INTERVAL  : 20
@@ -94,15 +95,24 @@ function Graph(arg_stock, arg_canvas){
 
 
     function draw(){
+        mContext.beginPath();
         mContext.fillStyle = GLOBAL.CANVAS_BG_COLOR;
         mContext.fillRect(0, 0, GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
         mContext.fill();
-        mContext.beginPath();
-        mContext.arc(center.getX(), center.getY(), 80, 0, 2 * Math.PI);
-        mContext.moveTo(0, center.getY());
-        mContext.lineTo(320,center.getY());
-        mContext.stroke();
+
         mData.draw(mContext);
+
+        mContext.beginPath();
+        mContext.arc(center.getX(), center.getY(), GLOBAL.CENTER_DIFF, 0, 2 * Math.PI);
+        mContext.fillStyle = "#FFAA00";
+        mContext.fill();
+
+        mContext.moveTo(0, 0);
+        mContext.lineTo(0,GLOBAL.CANVAS_HEIGHT);
+        mContext.lineTo(GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
+        mContext.lineTo(GLOBAL.CANVAS_WIDTH, 0);
+        mContext.lineTo(0, 0);
+        mContext.stroke();
     }
 
     this.start          = function(){
@@ -114,9 +124,11 @@ function Graph(arg_stock, arg_canvas){
 
     this.update         = function(arg_value){
         if(arg_value){
-            var tPoint = new Point({theta: 0, radius: 80, point: center, polar: true});
-            mData.addPoint(new GlassPinne(tPoint, arg_value, lastVal,"#33" + arg_value + "33"));
-            //mData.addPoint(new Tree(tPoint, arg_value,"#33" + arg_value + "33"));
+
+            var tColor = "#" + (255 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2).toString(16) + "33";
+            var tPoint = new Point({theta: 0, radius: 60, point: center, polar: true});
+            mData.addPoint(new GlassPinne(tPoint, arg_value, lastVal, tColor));
+            //mData.addPoint(new Tree(tPoint, arg_value, tColor));
             lastVal = arg_value;
         }
     };
@@ -205,6 +217,7 @@ function Point(arg_object){
 }//----End Point
 
 function Tree(arg_point, arg_value, arg_color){
+    "use strict";
     var mColor          = arg_color;
     var mCenter         = arg_point;
     var mValue          = arg_value;
@@ -227,12 +240,13 @@ function Tree(arg_point, arg_value, arg_color){
 
 
 function GlassPinne(arg_point, arg_value, arg_oldValue, arg_color){
+    "use strict";
     var mColor          = arg_color;
     var mStartPt        = arg_point;
     var mValue          = arg_value;
     var mOldVal         = arg_oldValue;
 
-    var mEndPt          = new Point({polar: true, point: arg_point.getCenter(), theta: -48 * Math.PI / 700, radius: 80});
+    var mEndPt          = new Point({polar: true, point: arg_point.getCenter(), theta: -48 * Math.PI / 700, radius: GLOBAL.CENTER_DIFF});
     var mSecPt          = new Point({polar: true, point: mStartPt, theta: 0, radius: mOldVal});
     var mThirdPt        = new Point({polar: true, point: mEndPt, theta: -48 * Math.PI / 700, radius: mValue});
 
