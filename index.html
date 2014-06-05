@@ -11,42 +11,10 @@
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
     <script src="./js/main.js" type="text/javascript" charset="utf-8"></script>
-    <style>
-        .graphContainer
-        {
-            position    : relative;
-            text-align  : center;
-            padding     : 0;
-            margin      : 0;
-        }
-        .graphContainer canvas
-        {
-            padding     : 0;
-            margin      : 0;
-        }
-        .graphValue
-        {
-            position    : absolute;
-            top         : 90px;
-            left        : 90px;
-            width       : 140px;
-            height      : 140px;
-            background  : #F9F9F9;
-            text-align  : center;
-            border-style: solid;
-            border-color: #333;
-            border-width: 1px;
-
-            color       : red;
-            -webkit-border-radius: 70px;
-            -moz-border-radius: 70px;
-            border-radius: 70px;
-        }
-    </style>
 </head>
 <body>
     <section data-role="page" data-theme="a" id="navigation">
-        <header data-role="header">
+        <header data-add-back-btn="true" data-role="header">
             <h1 id="yolo">st0ckBrok3r</h1>
         </header>
         <nav data-role="navbar" data-position="fixed">
@@ -56,17 +24,66 @@
         </nav>
     </section>
 
+    <section data-role="page" data-theme="f" id="Abnorma">
+        <header data-position="fixed" data-add-back-btn="true" data-role="header">
+            <h1 id="abnormaHeader">Abnorma</h1>
+        </header>
+        <div data-role="content" id="abnormaGraph" class="graphContainer">
+            <canvas id="canvasAbnorma">
+                Canvas is not... supported? This is horrible... :(
+            </canvas>
+            <div id="canvasDiv"></div>
+        </div>
+        <article data-role="content">
+            <p>
+            Confusor went out one morning and got very confused in the head.
+            So confused infact that he forgot to breathe.
+            Confusor died that morning.
+            Alone.
+            Help.
+            </p>
+
+
+        </article>
+    </section>
+
+    <section data-role="page" data-theme="g" id="Bizarro">
+        <header data-position="fixed" data-add-back-btn="true" data-role="header">
+            <h1 id="bizarroHeader">Bizarro</h1>
+        </header>
+        <div data-role="content" id="bizarroGraph" class="graphContainer">
+            <canvas id="canvasBizarro">
+                Canvas is not... supported? This is horrible... :(
+            </canvas>
+            <div id="canvasDiv"></div>
+        </div>
+        <article data-role="content">
+            <p>
+            Confusor went out one morning and got very confused in the head.
+            So confused infact that he forgot to breathe.
+            Confusor died that morning.
+            Alone.
+            Help.
+            </p>
+
+
+        </article>
+    </section>
+
     <section data-role="page" data-theme="e" id="Confusor">
-        <header data-position="fixed" data-role="header" id="confusorLOL">
-            <a  class="ui-btn ui-btn-icon-left ui-icon-arrow-l" data-rel="back" data-corners="false" href="#"></a>
+        <header data-position="fixed" data-add-back-btn="true" data-role="header">
             <h1 id="confusorHeader">Confusor</h1>
         </header>
         <div data-role="content" id="confusorGraph" class="graphContainer">
             <canvas id=canvasConfusor>
                 Canvas is not... supported? This is horrible... :(
             </canvas>
-            <div id="canvasDiv"></div> 
-            <!--<div id="confusorVal" class="graphValue">50</div>-->
+            <div>Current value:</div>
+        </div>
+        <div class="ui-grid-b">
+            <div class="ui-block-a"><button class"ui-btn" id="confusorButtonGraph">Graph</button></div>
+            <div class="ui-block-b"><button class"ui-btn" id="confusorButtonPlanet">Planet</button></div>
+            <div class="ui-block-c"><button class"ui-btn" id="confusorButtonTriforce">Triforce</button></div>
         </div>
         <article data-role="content">
             <p>

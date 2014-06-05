@@ -2,26 +2,86 @@
 /*global $:false, setInterval:false, document:false, clearInterval:false, console:false */
 
 var GLOBAL = {
-    CENTER_DIFF     : 60,
-    CANVAS_WIDTH    : 320,
-    CANVAS_HEIGHT   : 160,
-    CANVAS_BG_COLOR : "#FFBB99",//"#77BBFF",
+    CENTER_DIFF     : 44,
+    CANVAS_WIDTH    : 288,
+    CANVAS_HEIGHT   : 144,
+    CANVAS_BG_COLOR : "#F9F9F9",//"#77BBFF",
     CANVAS_STROKE   : "#000",
-    CENTER_Y        : 160,
-    CENTER_X        : 160,
+    CENTER_Y        : 144,
+    CENTER_X        : 144,
     STOCK_INTERVAL  : 1000,
     GRAPH_INTERVAL  : 20
 };
 
 
+var Stocks = {
+    init: function(){
+        this.abnorma         = new Stock("Abnorma","./js/Abnorma.js");
+        this.bizarro         = new Stock("Bizarro","./js/Bizarro.js");
+        this.confusor        = new Stock("Confusor","./js/Confusor.js");
+    }
+};
+
+var Graphs = {
+    init: function(){
+        this.abnorma         = new Graph($('#canvasAbnorma').get(0),Tree);
+        this.bizarro         = new Graph($('#canvasBizarro').get(0),Plank);
+        this.confusor        = new Graph($('#canvasConfusor').get(0), TriForce);
+    }
+};
+
 
 $(document).on('pageinit', function(){
     "use strict";
-    var confusorStock = new Stock("Confusor","./js/Bizarro.js");
-    var confusorGraph = new Graph(confusorStock,$('#canvasConfusor').get(0), Plank);
-    confusorGraph.start();
-    confusorStock.start();
+
+    Stocks.init();
+    Graphs.init();
+
+    Stocks.abnorma.start();
+    Stocks.bizarro.start();
+    Stocks.confusor.start();
 });
+
+$(document).on("pagebeforeshow","#Confusor",function(){
+    Stocks.confusor.subscribe(Graphs.confusor);
+    Graphs.confusor.start();
+    $( "#confusorButtonGraph" ).bind( "click", function(event, ui) {
+        Graphs.confusor.setFigure(Plank);
+    });
+    $( "#confusorButtonPlanet" ).bind( "click", function(event, ui) {
+        Graphs.confusor.setFigure(Tree);
+    });
+    $( "#confusorButtonTriforce" ).bind( "click", function(event, ui) {
+        Graphs.confusor.setFigure(TriForce);
+    });
+});
+
+$(document).on("pagehide","#Confusor",function(){
+    Stocks.confusor.unSubscribe(Graphs.confusor);
+    Graphs.confusor.stop();
+});
+
+$(document).on("pagebeforeshow","#Bizarro",function(){
+    Stocks.bizarro.subscribe(Graphs.bizarro);
+    Graphs.bizarro.start();
+});
+
+$(document).on("pagehide","#Bizarro",function(){
+    Stocks.bizarro.unSubscribe(Graphs.bizarro);
+    Graphs.bizarro.stop();
+});
+
+$(document).on("pagebeforeshow","#Abnorma",function(){
+    Stocks.abnorma.subscribe(Graphs.abnorma);
+    Graphs.abnorma.start();
+});
+
+$(document).on("pagehide","#Abnorma",function(){
+    Stocks.abnorma.unSubscribe(Graphs.abnorma);
+    Graphs.abnorma.stop();
+});
+
+
 
 function Stock(arg_name, arg_path){
     "use strict";
@@ -61,9 +121,13 @@ function Stock(arg_name, arg_path){
     this.subscribe      = function(arg_subscriber){
         observers.push(arg_subscriber);
     };
+    this.unSubscribe    = function(arg_subscriber){
+        var index       = observers.indexOf(arg_subscriber);
+        observers.splice(index,1);
+    };
 }//----End Stock
 
-function Graph(arg_stock, arg_canvas, arg_figure){
+function Graph(arg_canvas, arg_figure){
     "use strict";
     
     var mFigure         = arg_figure;
@@ -90,36 +154,49 @@ function Graph(arg_stock, arg_canvas, arg_figure){
 
     function draw(){
         mContext.beginPath();
-        mContext.fillStyle = GLOBAL.CANVAS_BG_COLOR;
+        mContext.fillStyle = "#F9F9F9";
         mContext.fillRect(0, 0, GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
         mContext.fill();
+
+        mContext.beginPath();
+        mContext.arc(center.getX(), center.getY(), GLOBAL.CENTER_DIFF + 100, 0, 2 * Math.PI);
+        mContext.fillStyle = "rgba(119, 187, 255, 0.56)";
+        mContext.fill();
+        mContext.stroke();
 
         mData.draw(mContext);
 
         mContext.beginPath();
         mContext.arc(center.getX(), center.getY(), GLOBAL.CENTER_DIFF, 0, 2 * Math.PI);
-        mContext.fillStyle = "#FFAA00";
+        mContext.fillStyle = "#ffb100";
         mContext.fill();
+        mContext.stroke();
 
-        mContext.moveTo(0, 0);
-        mContext.lineTo(0,GLOBAL.CANVAS_HEIGHT);
+        mContext.beginPath();
+        mContext.arc(center.getX(), center.getY(), GLOBAL.CENTER_DIFF + 50, 0, 2 * Math.PI);
+
+
+        mContext.moveTo(0,GLOBAL.CANVAS_HEIGHT);
         mContext.lineTo(GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
-        mContext.lineTo(GLOBAL.CANVAS_WIDTH, 0);
-        mContext.lineTo(0, 0);
         mContext.stroke();
     }
 
     this.start          = function(){
-        arg_stock.subscribe(this);
         intervalId      = setInterval(function(){
             physics();
             draw();
         },GLOBAL.GRAPH_INTERVAL);
     };
 
+    this.stop           = function(){
+        mData = new FifoQueue(17);
+        lastFig = 0;
+        clearInterval(intervalId);
+    };
+
     this.update         = function(arg_value){
         if(arg_value){
-            var tFunc = function(arg_time){
+            var tFunc   = function(arg_time){
                 if(arg_time < 10){
                     return "0" + arg_time;
                 }
@@ -128,12 +205,18 @@ function Graph(arg_stock, arg_canvas, arg_figure){
 
             var tTime = new Date();
             $(mCanvas).siblings().text("Current value: " + arg_value + " @" + tFunc(tTime.getHours()) + ":" + tFunc(tTime.getMinutes()) + ":" + tFunc(tTime.getSeconds())); 
-            var tColor = "#" + (255 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2).toString(16) + "00";
+
+            var tColor = "#" + (220 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2 + 20).toString(16) + "00";
             var tPoint = new Point({theta: 0, radius: GLOBAL.CENTER_DIFF, point: center, polar: true});
             var tFigure= new mFigure({point: tPoint, oldFigure: lastFig, value: parseInt(arg_value), color: tColor});
             mData.addPoint(tFigure);
             lastFig = tFigure;
         }
+    };
+
+    this.setFigure      = function(arg_figure){
+        mFigure = arg_figure;
+        lastFig = 0;
     };
 }//----End Graph
 
@@ -225,7 +308,8 @@ function Tree(arg_object){
     var mValue          = arg_object.value;
 
     var mSatPt          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue});
-    var mSatPt2         = new Point({polar: true, point: mSatPt, theta: 0, radius: mValue / 10 + 10});
+    var mSatPt2         = new Point({polar: true, point: mSatPt, theta: 0, radius: mValue / 8 + 4});
+    var mSatPt3         = new Point({polar: true, point: mSatPt2, theta: 0, radius: 9});
 
     this.getValPt       = function(){
         return mSatPt;
@@ -233,10 +317,11 @@ function Tree(arg_object){
 
     this.draw           = function(arg_context){
         arg_context.beginPath();
-        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 10, 0, 2 * Math.PI);
+        arg_context.arc(mSatPt.getX(), mSatPt.getY(), mValue / 8, 0, 2 * Math.PI);
         arg_context.moveTo(mSatPt2.getX(), mSatPt2.getY());
         arg_context.arc(mSatPt2.getX(), mSatPt2.getY(), 2, 0, 2 * Math.PI);
-        arg_context.moveTo(mCenter.getX(), mCenter.getY());
+        arg_context.moveTo(mSatPt3.getX(), mSatPt3.getY());
+        arg_context.arc(mSatPt3.getX(), mSatPt3.getY(), 1, 0, 2 * Math.PI);
         arg_context.fillStyle = mColor;
         arg_context.fill();
         arg_context.stroke();
@@ -244,6 +329,7 @@ function Tree(arg_object){
     this.move           = function(arg_theta){
         mSatPt.rotate(arg_theta);
         mSatPt2.rotate(3 * arg_theta);
+        mSatPt3.rotate(5 * arg_theta);
         mCenter.rotate(arg_theta);
     };
 }//----End Tree
@@ -256,6 +342,7 @@ function Plank(arg_object){
     var oldFig          = arg_object.oldFigure;
 
     var mPoint          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue});
+    var mSecondPoint    = new Point({polar: true, point: mCenter, theta: 0, radius: 90});
 
     this.getValPt       = function(){
         return mPoint;
@@ -273,12 +360,15 @@ function Plank(arg_object){
         }
         arg_context.lineTo(mCenter.getX(), mCenter.getY());
         arg_context.fill();
+        arg_context.lineTo(mSecondPoint.getX(), mSecondPoint.getY());
+        arg_context.strokeText(mValue, mSecondPoint.getX()-5, mSecondPoint.getY());
         arg_context.stroke();
     };
 
     this.move           = function(arg_theta){
         mCenter.rotate(arg_theta);
         mPoint.rotate(arg_theta);
+        mSecondPoint.rotate(arg_theta);
     };
 }//----End Plank
 
@@ -292,12 +382,16 @@ function TriForce(arg_object){
 
     var mPoints         = [];
 
-    mPoints.push(new Point({polar: true, point: mCenter, theta: 0, radius: 40}));
+    mPoints.push(new Point({polar: true, point: mCenter, theta: 0, radius: 50}));
     mPoints.push(new Point({polar: true, point: mPoints[0], theta: (3 * Math.PI)/ 2, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[1], theta: Math.PI / 6, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[2], theta: Math.PI / 6, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[3], theta: 5 * Math.PI / 6, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[4], theta: 5 * Math.PI / 6, radius: mValue})); 
+
+    this.getValPt       = function(){
+        return mPoints[0];
+    };
 
     this.draw           = function(arg_context){
         if(mPoints[0].getTheta() < (3 * Math.PI / 2)){
