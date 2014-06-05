@@ -1,17 +1,12 @@
 //Setting for JSHint.
 /*global $:false, setInterval:false, document:false, clearInterval:false, console:false */
 
-Number.prototype.mod = function(n){
-    "use strict";
-    return ((this % n) + n) % n;
-};
-
 var GLOBAL = {
-    CENTER_DIFF     : 50,
+    CENTER_DIFF     : 60,
     CANVAS_WIDTH    : 320,
     CANVAS_HEIGHT   : 160,
-    CANVAS_BG_COLOR : "#77BBFF",
-    CANVAS_STROKE   : "#333333",
+    CANVAS_BG_COLOR : "#FFBB99",//"#77BBFF",
+    CANVAS_STROKE   : "#000",
     CENTER_Y        : 160,
     CENTER_X        : 160,
     STOCK_INTERVAL  : 1000,
@@ -86,7 +81,6 @@ function Graph(arg_stock, arg_canvas, arg_figure){
     var center          = new Point({x: GLOBAL.CENTER_X, y: GLOBAL.CENTER_Y, polar: false});
     var intervalId;
 
-        arg_stock.subscribe(this);
 
 
     function physics(){
@@ -116,6 +110,7 @@ function Graph(arg_stock, arg_canvas, arg_figure){
     }
 
     this.start          = function(){
+        arg_stock.subscribe(this);
         intervalId      = setInterval(function(){
             physics();
             draw();
@@ -124,12 +119,19 @@ function Graph(arg_stock, arg_canvas, arg_figure){
 
     this.update         = function(arg_value){
         if(arg_value){
+            var tFunc = function(arg_time){
+                if(arg_time < 10){
+                    return "0" + arg_time;
+                }
+                return arg_time;
+            };
 
+            var tTime = new Date();
+            $(mCanvas).siblings().text("Current value: " + arg_value + " @" + tFunc(tTime.getHours()) + ":" + tFunc(tTime.getMinutes()) + ":" + tFunc(tTime.getSeconds())); 
             var tColor = "#" + (255 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2).toString(16) + "00";
             var tPoint = new Point({theta: 0, radius: GLOBAL.CENTER_DIFF, point: center, polar: true});
             var tFigure= new mFigure({point: tPoint, oldFigure: lastFig, value: parseInt(arg_value), color: tColor});
             mData.addPoint(tFigure);
-            console.log(lastFig + "true?");
             lastFig = tFigure;
         }
     };
@@ -150,7 +152,7 @@ function FifoQueue(arg_size){
 
     this.rotate         = function(arg_theta){
         if(mQueue){
-            for(var i = mQueue.length - 1; i > 0; i--){
+            for(var i = mQueue.length - 1; i >= 0; i--){
                 mQueue[i].move(arg_theta);
             }
         }
@@ -158,7 +160,7 @@ function FifoQueue(arg_size){
 
     this.draw           = function(arg_context){
         if(mQueue){
-            for(var i = mQueue.length - 1; i > 0; i--){
+            for(var i = mQueue.length - 1; i >= 0; i--){
                 mQueue[i].draw(arg_context);
             }
         }
@@ -241,7 +243,7 @@ function Tree(arg_object){
     };
     this.move           = function(arg_theta){
         mSatPt.rotate(arg_theta);
-        mSatPt2.rotate(3 / arg_theta);
+        mSatPt2.rotate(3 * arg_theta);
         mCenter.rotate(arg_theta);
     };
 }//----End Tree
@@ -252,7 +254,6 @@ function Plank(arg_object){
     var mCenter         = arg_object.point;
     var mValue          = arg_object.value;
     var oldFig          = arg_object.oldFigure;
-    console.log(oldFig + "Plank constructor");
 
     var mPoint          = new Point({polar: true, point: mCenter, theta: 0, radius: mValue});
 
@@ -264,12 +265,10 @@ function Plank(arg_object){
         arg_context.beginPath();
         arg_context.fillStyle = mColor;
         if(oldFig){
-            console.log("true");
             arg_context.moveTo(oldFig.getValPt().getCenter().getX(), oldFig.getValPt().getCenter().getY());
             arg_context.lineTo(oldFig.getValPt().getX(), oldFig.getValPt().getY());
             arg_context.lineTo(mPoint.getX(), mPoint.getY());
-        }else if(olgFig === 0){
-            console.log("false");
+        }else{
             arg_context.moveTo(mPoint.getX(), mPoint.getY());
         }
         arg_context.lineTo(mCenter.getX(), mCenter.getY());
@@ -293,7 +292,7 @@ function TriForce(arg_object){
 
     var mPoints         = [];
 
-    mPoints.push(new Point({polar: true, point: mCenter, theta: 0, radius: 60}));
+    mPoints.push(new Point({polar: true, point: mCenter, theta: 0, radius: 40}));
     mPoints.push(new Point({polar: true, point: mPoints[0], theta: (3 * Math.PI)/ 2, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[1], theta: Math.PI / 6, radius: mValue}));
     mPoints.push(new Point({polar: true, point: mPoints[2], theta: Math.PI / 6, radius: mValue}));
