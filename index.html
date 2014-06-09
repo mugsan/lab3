@@ -11,91 +11,220 @@
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
     <script src="./js/main.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        @media all and (min-width: 321px){
+            .mBreak .ui-block-a,
+            .mBreak .ui-block-b,
+            .mBreak .ui-block-c {
+                width: 100%;
+                float: none;
+            }
+            .mBreak2 > .ui-block-a {
+                width: 70%;
+                float: left;
+            }
+            .mBreak2 > .ui-block-b {
+                width: 30%;
+                float: right;
+            }
+        }
+        @media all and (max-width: 320px){
+
+
+            .mBreak2 > .ui-block-a,
+            .mBreak2 > .ui-block-b {
+                width: 100%;
+                float: none;
+            }
+        }
+
+        .stockLink {
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
+<!--    Start Page: MAIN-->
     <section data-role="page" data-theme="a" id="navigation">
         <header data-add-back-btn="true" data-role="header">
             <h1 id="yolo">st0ckBrok3r</h1>
         </header>
         <nav data-role="navbar" data-position="fixed">
-            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="f" data-transition="slide" href="#Abnorma" >Abnorma</a>
-            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="g" data-transition="slide" href="#Bizarro" >Bizarro</a>
-            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="e" data-transition="slide" href="#Confusor">Confusor</a>
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="f" data-transition="slide" href="#Abnorma" >
+                <div class="stockLink">
+                    <h1>Abnorma</h1>
+                    <span>Current Value: <span class="abnormaValue"></span></span>
+                </div>
+            </a>
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="g" data-transition="slide" href="#Bizarro" >
+                <div class="stockLink">
+                    <h1>Bizarro</h1>
+                    <span>Current Value: <span class="bizarroValue"></span></span>
+                </div>
+            </a>
+            <a class="ui-btn ui-btn-icon-right ui-icon-arrow-r" data-theme="e" data-transition="slide" href="#Confusor">
+                <div class="stockLink">
+                    <h1>Confusor</h1>
+                    <span>Current Value: <span class="confusorValue"></span></span>
+                </div>
+            </a>
         </nav>
     </section>
-
+<!--    End Page: MAIN-->
+<!--    Start Page: Abnorma-->
     <section data-role="page" data-theme="f" id="Abnorma">
         <header data-position="fixed" data-add-back-btn="true" data-role="header">
             <h1 id="abnormaHeader">Abnorma</h1>
         </header>
-        <div data-role="content" id="abnormaGraph" class="graphContainer">
-            <canvas id="canvasAbnorma">
-                Canvas is not... supported? This is horrible... :(
-            </canvas>
-            <div id="canvasDiv"></div>
-        </div>
-        <article data-role="content">
-            <p>
-            Confusor went out one morning and got very confused in the head.
-            So confused infact that he forgot to breathe.
-            Confusor died that morning.
-            Alone.
-            Help.
-            </p>
-
-
-        </article>
+        <section data-role="content">
+            <div class="ui-grid-a mBreak2">
+                <div class="ui-block-a">
+                    <canvas id=canvasAbnorma>
+                        Canvas is not... supported? This is horrible... :(
+                    </canvas>
+                    <div>Current value:</div>
+                </div>
+                <div class="ui-block-b ui-grid-b mBreak">
+                    <div class="ui-block-a buttonPlank"><button>Graph</button></div>
+                    <div class="ui-block-b buttonPlanet"><button>Planet</button></div>
+                    <div class="ui-block-c buttonTriforce"><button>Triforce</button></div>
+                </div>
+            </div>
+            <div data-role="collapsible">
+                <h2>Introduction</h2>
+                <p>
+                    Abnorma are all about analyzing avarage azylums. We wont waver will we?
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Goals</h2>
+                <p>
+                    We have achieved every goal we have ever set. We are really good you know?
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Awards</h2>
+                <p>
+                    Our moms say we are special.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Work for us?</h2>
+                <p>
+                    We do not currently accept work.
+                </p>
+            </div>
+        </section>
+        <footer data-role="footer">
+            <h1>
+                magbjr-3 2014
+            </h1>
+        </footer>
     </section>
-
+<!--    End Page: Abnorma-->
+<!--    Start Page: Bizarro-->
     <section data-role="page" data-theme="g" id="Bizarro">
         <header data-position="fixed" data-add-back-btn="true" data-role="header">
             <h1 id="bizarroHeader">Bizarro</h1>
         </header>
-        <div data-role="content" id="bizarroGraph" class="graphContainer">
-            <canvas id="canvasBizarro">
-                Canvas is not... supported? This is horrible... :(
-            </canvas>
-            <div id="canvasDiv"></div>
-        </div>
-        <article data-role="content">
-            <p>
-            Confusor went out one morning and got very confused in the head.
-            So confused infact that he forgot to breathe.
-            Confusor died that morning.
-            Alone.
-            Help.
-            </p>
-
-
-        </article>
+        <section data-role="content">
+            <div class="ui-grid-a mBreak2">
+                <div class="ui-block-a">
+                    <canvas id=canvasBizarro>
+                        Canvas is not... supported? This is horrible... :(
+                    </canvas>
+                    <div>Current value:</div>
+                </div>
+                <div class="ui-block-b ui-grid-b mBreak">
+                    <div class="ui-block-a buttonPlank"><button>Graph</button></div>
+                    <div class="ui-block-b buttonPlanet"><button>Planet</button></div>
+                    <div class="ui-block-c buttonTriforce"><button>Triforce</button></div>
+                </div>
+            </div>
+            <div data-role="collapsible">
+                <h2>Introduction</h2>
+                <p>
+                    Our company doesn't need any introductions. But we will give you one anyway!
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Goals</h2>
+                <p>
+                    We will weird you out, don't you worry about that.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Awards</h2>
+                <p>
+                    Frank in logistics won the lottery once.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Work for us?</h2>
+                <p>
+                    Don't you already work for us?
+                </p>
+            </div>
+        </section>
+        <footer data-role="footer">
+            <h1>
+                magbjr-3 2014
+            </h1>
+        </footer>
     </section>
-
+<!--    End Page: Bizarro-->
+<!--    Start Page: Confusor-->
     <section data-role="page" data-theme="e" id="Confusor">
         <header data-position="fixed" data-add-back-btn="true" data-role="header">
             <h1 id="confusorHeader">Confusor</h1>
         </header>
-        <div data-role="content" id="confusorGraph" class="graphContainer">
-            <canvas id=canvasConfusor>
-                Canvas is not... supported? This is horrible... :(
-            </canvas>
-            <div>Current value:</div>
-        </div>
-        <div class="ui-grid-b">
-            <div class="ui-block-a"><button class"ui-btn" id="confusorButtonGraph">Graph</button></div>
-            <div class="ui-block-b"><button class"ui-btn" id="confusorButtonPlanet">Planet</button></div>
-            <div class="ui-block-c"><button class"ui-btn" id="confusorButtonTriforce">Triforce</button></div>
-        </div>
-        <article data-role="content">
-            <p>
-            Confusor went out one morning and got very confused in the head.
-            So confused infact that he forgot to breathe.
-            Confusor died that morning.
-            Alone.
-            Help.
-            </p>
-            
-            
-        </article>
+        <section data-role="content">
+            <div class="ui-grid-a mBreak2">
+                <div class="ui-block-a">
+                    <canvas id=canvasConfusor>
+                        Canvas is not... supported? This is horrible... :(
+                    </canvas>
+                    <div>Current value:</div>
+                </div>
+                <div class="ui-block-b ui-grid-b mBreak">
+                    <div class="ui-block-a buttonPlank"><button>Graph</button></div>
+                    <div class="ui-block-b buttonPlanet"><button>Planet</button></div>
+                    <div class="ui-block-c buttonTriforce"><button>Triforce</button></div>
+                </div>
+            </div>
+            <div data-role="collapsible">
+                <h2>Introduction</h2>
+                <p>
+                    Our company is totally awesome and everyone should buy our product.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Goals</h2>
+                <p>
+                    To become the leading company in the confusment industry.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Awards</h2>
+                <p>
+                    Currently holds exactly 0 awards.
+                </p>
+            </div>
+            <div data-role="collapsible">
+                <h2>Work for us?</h2>
+                <p>
+                    Who would want to work for us?
+                </p>
+            </div>
+        </section>
+        <footer data-role="footer">
+            <h1>
+                magbjr-3 2014
+            </h1>
+        </footer>
     </section>
+<!--    End Page: Confusor-->
 </body>
 </html>
