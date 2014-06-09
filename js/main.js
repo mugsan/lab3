@@ -186,6 +186,8 @@ function Graph(){
     var lastFig         = 0;
     //Figures are stored in a FifoQueue.
     var mData           = new FifoQueue(17);
+    //FifoQueue holds values of 30 updates.
+    var mValues         = new FifoQueue(30);
     //Magicnumber, velocity of figures.
     var POINT_SPEED     = Math.PI / 700;
     //Center of movement. Figures rotate around this Point.
@@ -259,6 +261,7 @@ function Graph(){
     */
     this.stop           = function(){
         mData = new FifoQueue(17);
+        mValues = new FifoQueue(30);
         lastFig = 0;
         clearInterval(intervalId);
     };
@@ -278,12 +281,13 @@ function Graph(){
             };
 
             var tTime = new Date();
-            $(mCanvas).siblings().text("Current value: " + arg_value + " @" + tFunc(tTime.getHours()) + ":" + tFunc(tTime.getMinutes()) + ":" + tFunc(tTime.getSeconds())); 
 
             var tColor = "#" + (220 - 2 * parseInt(arg_value)).toString(16) + (parseInt(arg_value) * 2 + 20).toString(16) + "00";
             var tPoint = new Point({theta: 0, radius: GLOBAL.CENTER_DIFF, point: center, polar: true});
             var tFigure= new mFigure({point: tPoint, oldFigure: lastFig, value: parseInt(arg_value), color: tColor});
+            mValues.addPoint(parseInt(arg_value));
             mData.addPoint(tFigure);
+            $(mCanvas).siblings().text("Current: " + arg_value + " Average: " + mValues.meanValue() + " @" + tFunc(tTime.getHours()) + ":" + tFunc(tTime.getMinutes()) + ":" + tFunc(tTime.getSeconds()));
             lastFig = tFigure;
         }
     };
@@ -316,6 +320,14 @@ function FifoQueue(arg_size){
         mQueue.push(arg_object);
     };
 
+    this.meanValue      = function(){
+
+        var sum = 0;
+        for(var i = 0; i < mQueue.length; i++){
+            sum += mQueue[i];
+        }
+        return Math.floor(sum / mQueue.length);
+    };
     this.rotate         = function(arg_theta){
         if(mQueue){
             for(var i = mQueue.length - 1; i >= 0; i--){
