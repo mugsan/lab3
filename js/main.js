@@ -16,7 +16,7 @@ var GLOBAL = {
     CENTER_Y        : 144,
     CENTER_X        : 144,
     STOCK_INTERVAL  : 1000,
-    GRAPH_INTERVAL  : 20
+    GRAPH_INTERVAL  : 40
 };
 
 /*On DOM load:
@@ -43,7 +43,6 @@ $(document).on('pageinit', function(){
         GLOBAL.graph.setFigure(TriForce);
     });
 });
-
 
 /*pagebeforeshow:
 assigns canvas of incoming page to the GLOBAL.graph object,
@@ -84,7 +83,6 @@ $(document).on("pagehide","#Abnorma",function(){
     GLOBAL.graph.stop();
 });
 
-
 /*Class StockObserver (Observer)
 * @param: {string} Css class to update.
 */
@@ -92,6 +90,7 @@ function StockObserver(arg_clas_string){
     "use strict";
     var mClass          = arg_clas_string;
     var lValue;
+
     /*Priviliged method called by Stock (Observable).
     * Updates DOM with given value, changes color in relation to last value.
     * @param: {string} new value given from Stock (Observable).
@@ -136,6 +135,7 @@ function Stock(arg_name, arg_path){
             }
         });
     }
+
     /*Private method called by update().
     * Calls update() of all subscribed observers.
     */
@@ -147,6 +147,7 @@ function Stock(arg_name, arg_path){
     this.getName        = function(){
         return name;
     };
+
     /*Privileged method called on DOM init.
     * Starts a loop that will call update().
     */
@@ -158,6 +159,7 @@ function Stock(arg_name, arg_path){
     this.stop           = function(){
         clearInterval(intervalId);
     };
+
     /*Privileged method called by Observers
     * Adds a subscriber to notification list (observers[]).
     * @param: {object} Subscriber to be added.
@@ -165,6 +167,7 @@ function Stock(arg_name, arg_path){
     this.subscribe      = function(arg_subscriber){
         observers.push(arg_subscriber);
     };
+
     /*Privileged method called by Observers
     * Removes a subscriber from notification list.
     * @param: {object} Subscriber to be removed.
@@ -189,7 +192,7 @@ function Graph(){
     //FifoQueue holds values of 30 updates.
     var mValues         = new FifoQueue(30);
     //Magicnumber, velocity of figures.
-    var POINT_SPEED     = Math.PI / 700;
+    var POINT_SPEED     = Math.PI / 350;
     //Center of movement. Figures rotate around this Point.
     var center          = new Point({x: GLOBAL.CENTER_X, y: GLOBAL.CENTER_Y, polar: false});
 
@@ -203,7 +206,6 @@ function Graph(){
     function physics(){
         mData.rotate(POINT_SPEED);
     }
-
 
     /*Private method called by this.start().
     * Draws all Figures of mData on current canvas.
@@ -236,6 +238,7 @@ function Graph(){
         mContext.lineTo(GLOBAL.CANVAS_WIDTH, GLOBAL.CANVAS_HEIGHT);
         mContext.stroke();
     }
+
     /*Privileged method called by pagebeforeshow events.
     * @param: {object} canvas of incoming page.
     */
@@ -443,6 +446,7 @@ function Planet(arg_object){
         mCenter.rotate(arg_theta);
     };
 }//----End Planet
+
 /*Class Plank (Figure)
 * Instantiated by Stock(Observable) via Graph(Observer).
 * Designed to deliver information. Changes color and draws text and lines depending on Stockvalue.
